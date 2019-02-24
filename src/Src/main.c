@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -46,8 +46,6 @@
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-I2C_HandleTypeDef hi2c1;
-
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
@@ -59,7 +57,7 @@ UART_HandleTypeDef huart1;
 #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 #endif /* __GNUC__ */
 void __io_putchar(uint8_t ch) {
-  HAL_UART_Transmit(&huart1, &ch, 1, 1);
+	HAL_UART_Transmit(&huart1, &ch, 1, 1);
 }
 
 
@@ -68,7 +66,6 @@ void __io_putchar(uint8_t ch) {
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_I2C1_Init(void);
 static void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
@@ -79,14 +76,14 @@ static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN 0 */
 
 //test_uart
-void test_uart(){
-  printf("Hello UART1!\n");
-  uint8_t c;
-  while (1){
-    if( HAL_UART_Receive( &huart1, &c, 1, 0xFFFF ) == HAL_OK ){
-      printf("UART1: %c\n", c);
-    }
-  }
+void test_uart() {
+	printf("Hello UART1!\n");
+	uint8_t c;
+	while (1) {
+		if (HAL_UART_Receive(&huart1, &c, 1, 0xFFFF) == HAL_OK) {
+			printf("UART1: %c\n", c);
+		}
+	}
 }
 
 
@@ -110,7 +107,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  setbuf(stdout, NULL);
+	setbuf(stdout, NULL);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -122,102 +119,74 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_I2C1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  //test_uart();
+	//test_uart();
 
-  uint32_t c=0;
 
-  led_hachune_t hachune[3];
+	led_hachune_t hachune[3];
+	led_hachune_t hachune_OFF;
+
+	hachune_OFF.led[0] = get_color(0);
+	hachune_OFF.led[1] = get_color(0);
+	hachune_OFF.led[2] = get_color(0);
+	hachune_OFF.led[3] = get_color(0);
+
+	uint32_t i = 0;
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+	while (1) {
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
+		if (HAL_GPIO_ReadPin(ON_GPIO_Port, ON_Pin) == GPIO_PIN_SET) {
+			if (HAL_GPIO_ReadPin(MODE_GPIO_Port, MODE_Pin) == GPIO_PIN_SET) {
+				//ゲーミング仕様
+				hachune[0].led[0] = get_hsv(i % 360, 255, 255);
+				hachune[0].led[1] = get_hsv((i + 30) % 360, 255, 255);
+				hachune[0].led[2] = get_color(0x000000);
+				hachune[0].led[3] = get_color(0x000000);
 
-	//うるさいやつ
-	for(int i=0;i<360*5;i++){
-		hachune[0].led[0] = get_hsv(i%360,255,255);
-		hachune[0].led[1] = get_hsv((i+30)%360,255,255);
-		hachune[0].led[2] = get_color(0x000000);
-		hachune[0].led[3] = get_color(0x000000);
+				hachune[1].led[0] = get_hsv(i % 360, 255, 255);
+				hachune[1].led[1] = get_color(0x000000);
+				hachune[1].led[2] = get_hsv((i + 30) % 360, 255, 255);
+				hachune[1].led[3] = get_color(0x000000);
 
-		hachune[1].led[0] = get_hsv(i%360,255,255);
-		hachune[1].led[1] = get_color(0x000000);
-		hachune[1].led[2] = get_hsv((i+30)%360,255,255);
-		hachune[1].led[3] = get_color(0x000000);
+				hachune[2].led[0] = get_hsv(i % 360, 255, 255);
+				hachune[2].led[1] = get_color(0x000000);
+				hachune[2].led[2] = get_color(0x000000);
+				hachune[2].led[3] = get_hsv((i + 30) % 360, 255, 255);
 
-		hachune[2].led[0] = get_hsv(i%360,255,255);
-		hachune[2].led[1] = get_color(0x000000);
-		hachune[2].led[2] = get_color(0x000000);
-		hachune[2].led[3] = get_hsv((i+30)%360,255,255);
+				led_hachune(&hachune[(i / 45) % 4 != 3 ? (i / 45) % 4 : 1]);
+			} else {
+				//通常
+				hachune[0].led[0] = get_color(0x00fa9a);
+				hachune[0].led[1] = get_color(0x00FF00);
+				hachune[0].led[2] = get_color(0x000000);
+				hachune[0].led[3] = get_color(0x000000);
 
-		led_hachune(&hachune[(i/45)%4 != 3 ? (i/45)%4 : 1 ]);
+				hachune[1].led[0] = get_color(0x00fa9a);
+				hachune[1].led[1] = get_color(0x000000);
+				hachune[1].led[2] = get_color(0x00FF00);
+				hachune[1].led[3] = get_color(0x000000);
 
+				hachune[2].led[0] = get_color(0x00fa9a);
+				hachune[2].led[1] = get_color(0x000000);
+				hachune[2].led[2] = get_color(0x000000);
+				hachune[2].led[3] = get_color(0x00FF00);
+
+				led_hachune(&hachune[(i / 45) % 4 != 3 ? (i / 45) % 4 : 1]);
+			}
+		} else {
+			led_hachune(&hachune_OFF);
+		}
+		i++;
 		HAL_Delay(6);
+
 	}
-
-	//Y配色
-	hachune[0].led[0] = get_color(0x00fa9a);
-	hachune[0].led[1] = get_color(0x00FF00);
-	hachune[0].led[2] = get_color(0x000000);
-	hachune[0].led[3] = get_color(0x000000);
-
-	hachune[1].led[0] = get_color(0x00fa9a);
-	hachune[1].led[1] = get_color(0x000000);
-	hachune[1].led[2] = get_color(0x00FF00);
-	hachune[1].led[3] = get_color(0x000000);
-
-	hachune[2].led[0] = get_color(0x00fa9a);
-	hachune[2].led[1] = get_color(0x000000);
-	hachune[2].led[2] = get_color(0x000000);
-	hachune[2].led[3] = get_color(0x00FF00);
-
-	for(int i=0;i<10;i++){
-		led_hachune(&hachune[0]);
-		HAL_Delay(300);
-		led_hachune(&hachune[1]);
-		HAL_Delay(300);
-		led_hachune(&hachune[2]);
-		HAL_Delay(300);
-		led_hachune(&hachune[1]);
-		HAL_Delay(300);
-	}
-
-	//R配色
-	hachune[0].led[0] = get_color(0x4DFFE4);
-	hachune[0].led[1] = get_color(0x89FF42);
-	hachune[0].led[2] = get_color(0x000000);
-	hachune[0].led[3] = get_color(0x000000);
-
-	hachune[1].led[0] = get_color(0x4DFFE4);
-	hachune[1].led[1] = get_color(0x000000);
-	hachune[1].led[2] = get_color(0x89FF42);
-	hachune[1].led[3] = get_color(0x000000);
-
-	hachune[2].led[0] = get_color(0x4DFFE4);
-	hachune[2].led[1] = get_color(0x000000);
-	hachune[2].led[2] = get_color(0x000000);
-	hachune[2].led[3] = get_color(0x89FF42);
-
-	for(int i=0;i<10;i++){
-		led_hachune(&hachune[0]);
-		HAL_Delay(300);
-		led_hachune(&hachune[1]);
-		HAL_Delay(300);
-		led_hachune(&hachune[2]);
-		HAL_Delay(300);
-		led_hachune(&hachune[1]);
-		HAL_Delay(300);
-	}
-
-  }
   /* USER CODE END 3 */
 
 }
@@ -235,10 +204,8 @@ void SystemClock_Config(void)
 
     /**Initializes the CPU, AHB and APB busses clocks 
     */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSI48;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48;
   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
-  RCC_OscInitStruct.HSICalibrationValue = 16;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -258,9 +225,8 @@ void SystemClock_Config(void)
     _Error_Handler(__FILE__, __LINE__);
   }
 
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_I2C1;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1;
   PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK1;
-  PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_HSI;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -276,40 +242,6 @@ void SystemClock_Config(void)
 
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
-}
-
-/* I2C1 init function */
-static void MX_I2C1_Init(void)
-{
-
-  hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x2000090E;
-  hi2c1.Init.OwnAddress1 = 0;
-  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c1.Init.OwnAddress2 = 0;
-  hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-    /**Configure Analogue filter 
-    */
-  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-    /**Configure Digital filter 
-    */
-  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
 }
 
 /* USART1 init function */
@@ -352,6 +284,12 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, LED0_Pin|LED1_Pin|LED2_Pin|LED3_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pins : MODE_Pin ON_Pin */
+  GPIO_InitStruct.Pin = MODE_Pin|ON_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
   /*Configure GPIO pins : LED0_Pin LED1_Pin LED2_Pin LED3_Pin */
   GPIO_InitStruct.Pin = LED0_Pin|LED1_Pin|LED2_Pin|LED3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -374,10 +312,9 @@ static void MX_GPIO_Init(void)
 void _Error_Handler(char *file, int line)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  while(1)
-  {
-  }
+	/* User can add his own implementation to report the HAL error return state */
+	while (1) {
+	}
   /* USER CODE END Error_Handler_Debug */
 }
 
@@ -392,8 +329,8 @@ void _Error_Handler(char *file, int line)
 void assert_failed(uint8_t* file, uint32_t line)
 { 
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+	/* User can add his own implementation to report the file name and line number,
+	   tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

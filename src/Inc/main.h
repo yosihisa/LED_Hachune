@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -49,6 +49,10 @@
 
 /* Private define ------------------------------------------------------------*/
 
+#define MODE_Pin GPIO_PIN_0
+#define MODE_GPIO_Port GPIOF
+#define ON_Pin GPIO_PIN_1
+#define ON_GPIO_Port GPIOF
 #define LED0_Pin GPIO_PIN_0
 #define LED0_GPIO_Port GPIOA
 #define LED1_Pin GPIO_PIN_1
